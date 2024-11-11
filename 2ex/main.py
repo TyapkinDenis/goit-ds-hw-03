@@ -1,4 +1,6 @@
 import requests
+import json
+
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
@@ -69,5 +71,21 @@ db.authors.insert_many(list(authors_data.values()))
 
 # Вставка цитат в колекцію quotes
 db.quotes.insert_many(quotes_data)
+
+# ДОДАНО
+
+def remove_objectid(data):
+    if isinstance(data, list):
+        return [remove_objectid(item) for item in data]
+    elif isinstance(data, dict):
+        return {k: remove_objectid(v) for k, v in data.items() if k != '_id'}
+    return data
+
+# Зберігаємо дані у JSON файли
+with open('quotes.json', 'w', encoding='utf-8') as f:
+    json.dump(remove_objectid(quotes_data), f, ensure_ascii=False)
+
+with open('authors.json', 'w', encoding='utf-8') as f:
+    json.dump(remove_objectid(list(authors_data.values())), f, ensure_ascii=False)
 
 print("Дані успішно зібрано та завантажено.")
